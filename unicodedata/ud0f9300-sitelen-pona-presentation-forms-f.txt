@@ -1,4 +1,0 @@
-@flag --sitelen-pona-presentation-forms-f
-@substring tt
-@file Blocks.txt
-F9300..F93FF; Sitelen Pona Presentation Forms-F
