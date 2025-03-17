@@ -1,4 +1,0 @@
-@flag --sitelen-pona-presentation-forms-i
-@substring tt
-@file Blocks.txt
-FEE00..FEEFF; Sitelen Pona Presentation Forms-I
