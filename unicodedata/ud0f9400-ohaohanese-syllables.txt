@@ -1,0 +1,3 @@
+@flag --ohaohanese-syllables
+@file Blocks.txt
+F9400..F959F; Ohaohanese Syllables
