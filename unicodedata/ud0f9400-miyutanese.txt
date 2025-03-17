@@ -1,0 +1,7 @@
+@flag --miyutanese
+@file Blocks.txt
+F9400..F959F; Miyutanese
+@file UnicodeData.txt
+F9400;MIYUTANESE LETTER P;Lo;0;L;;;;;N;;;;;
+F9401;MIYUTANESE LETTER B;Lo;0;L;;;;;N;;;;;
+F9402;MIYUTANESE LETTER M;Lo;0;L;;;;;N;;;;;
