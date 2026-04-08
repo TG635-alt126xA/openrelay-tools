@@ -567,16 +567,19 @@ class GlyphCollection:
 			f.write('  # LONG TASUN\n\n')
 			f.write('  # extend tasun to the right\n')
 			f.write('  lookup spTasunForward {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			f.write('    sub [%s %s %s] %s\' by %s;\n' % tuple(tasunGlyphs[i].name for i in [0, 1, 3, 4, 1]))
 			f.write('  } spTasunForward;\n\n')
 			f.write('  # extend tasun to the left\n')
 			f.write('  lookup spTasunBackward {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			f.write('    rsub %s\' [%s %s %s] by %s;\n' % tuple(tasunGlyphs[i].name for i in [4, 1, 2, 5, 1]))
 			f.write('  } spTasunBackward;\n\n')
 		if cartGN or (cartZW and cartableGN):
 			f.write('  # CARTOUCHES\n\n')
 			f.write('  # extend cartouches across ideographs to the right\n')
 			f.write('  lookup spCartoucheForward {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			if cartZW and cartableGN:
 				if cartGN:
 					f.write('    sub @spCartoucheStart [@spCartoucheless @spCartoucheAuto]\' lookup spCartoucheApplyForward;\n')
@@ -589,23 +592,27 @@ class GlyphCollection:
 			if cartZW and cartableGN:
 				for i in range(1, rsubDepth + 1):
 					if cartGN:
-						f.write('  lookup spCartoucheBackwardRsub%02d { rsub @spCartoucheless\' @spCartoucheEnd by @spCartouche; } spCartoucheBackwardRsub%02d;\n' % (i, i))
-					f.write('  lookup spCartoucheBackwardFsub%02d { sub @spCartoucheAuto\' lookup spCartoucheApplyBackward @spCartoucheEnd; } spCartoucheBackwardFsub%02d;\n' % (i, i))
-				f.write('  lookup spCartoucheBackwardCleanup { sub @spCartoucheEncl\' @spCartoucheEncl by NULL; } spCartoucheBackwardCleanup;\n\n')
+						f.write('  lookup spCartoucheBackwardRsub%02d { lookupflag IgnoreMarks; rsub @spCartoucheless\' @spCartoucheEnd by @spCartouche; } spCartoucheBackwardRsub%02d;\n' % (i, i))
+					f.write('  lookup spCartoucheBackwardFsub%02d { lookupflag IgnoreMarks; sub @spCartoucheAuto\' lookup spCartoucheApplyBackward @spCartoucheEnd; } spCartoucheBackwardFsub%02d;\n' % (i, i))
+				f.write('  lookup spCartoucheBackwardCleanup { lookupflag IgnoreMarks; sub @spCartoucheEncl\' @spCartoucheEncl by NULL; } spCartoucheBackwardCleanup;\n\n')
 			else:
 				f.write('  lookup spCartoucheBackward {\n')
+				f.write('    lookupflag IgnoreMarks;\n')
 				f.write('    rsub @spCartoucheless\' @spCartoucheEnd by @spCartouche;\n')
 				f.write('  } spCartoucheBackward;\n\n')
 		if kxTriples and kxPairs:
 			f.write('  # REVERSE EXTENDED KIJETESANTAKALU\n\n')
 			f.write('  lookup spExtensionKijeStart {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			f.write('    sub @spKijeExtensionless\' uF199B [@spKijeExtendable @spKijeExtended] by @spKijeExtension;\n')
 			f.write('    sub [@spKijeExtensionless @spKijeExtension] uF199B @spKijeExtendable\' by @spKijeExtended;\n')
 			f.write('  } spExtensionKijeStart;\n\n')
 			f.write('  lookup spExtensionKijeContinue {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			f.write('    rsub @spKijeExtensionless\' @spKijeExtension by @spKijeExtension;\n')
 			f.write('  } spExtensionKijeContinue;\n\n')
 			f.write('  lookup spExtensionKijeEnd {\n')
+			f.write('    lookupflag IgnoreMarks;\n')
 			f.write('    sub uF199A @spKijeExtension\' by @spKijeExtensionEnd;\n')
 			f.write('  } spExtensionKijeEnd;\n\n')
 		if fxPairs or rxPairs or extGN or (extZW and cartableGN):
@@ -613,16 +620,19 @@ class GlyphCollection:
 			if fxPairs:
 				f.write('  # replace ideograph + start of long glyph with glyph extended to the right\n')
 				f.write('  lookup spExtensionNormal {\n')
+				f.write('    lookupflag IgnoreMarks;\n')
 				f.write('    sub @spExtendable\' uF1997 by @spExtended;\n')
 				f.write('  } spExtensionNormal;\n\n')
 			if rxPairs:
 				f.write('  # replace end of reverse long glyph + ideograph with glyph extended to the left\n')
 				f.write('  lookup spExtensionReverse {\n')
+				f.write('    lookupflag IgnoreMarks;\n')
 				f.write('    sub uF199B @spReverseExtendable\' by @spReverseExtended;\n')
 				f.write('  } spExtensionReverse;\n\n')
 			if extGN or (extZW and cartableGN):
 				f.write('  # extend long glyphs across ideographs to the right\n')
 				f.write('  lookup spExtensionForward {\n')
+				f.write('    lookupflag IgnoreMarks;\n')
 				if extZW and cartableGN:
 					if extGN:
 						f.write('    sub @spExtensionStart [@spExtensionless @spExtensionAuto]\' lookup spExtensionApplyForward;\n')
@@ -635,11 +645,12 @@ class GlyphCollection:
 				if extZW and cartableGN:
 					for i in range(1, rsubDepth + 1):
 						if extGN:
-							f.write('  lookup spExtensionBackwardRsub%02d { rsub @spExtensionless\' @spExtensionEnd by @spExtension; } spExtensionBackwardRsub%02d;\n' % (i, i))
-						f.write('  lookup spExtensionBackwardFsub%02d { sub @spExtensionAuto\' lookup spExtensionApplyBackward @spExtensionEnd; } spExtensionBackwardFsub%02d;\n' % (i, i))
-					f.write('  lookup spExtensionBackwardCleanup { sub @spExtensionEncl\' @spExtensionEncl by NULL; } spExtensionBackwardCleanup;\n\n')
+							f.write('  lookup spExtensionBackwardRsub%02d { lookupflag IgnoreMarks; rsub @spExtensionless\' @spExtensionEnd by @spExtension; } spExtensionBackwardRsub%02d;\n' % (i, i))
+						f.write('  lookup spExtensionBackwardFsub%02d { lookupflag IgnoreMarks; sub @spExtensionAuto\' lookup spExtensionApplyBackward @spExtensionEnd; } spExtensionBackwardFsub%02d;\n' % (i, i))
+					f.write('  lookup spExtensionBackwardCleanup { lookupflag IgnoreMarks; sub @spExtensionEncl\' @spExtensionEncl by NULL; } spExtensionBackwardCleanup;\n\n')
 				else:
 					f.write('  lookup spExtensionBackward {\n')
+					f.write('    lookupflag IgnoreMarks;\n')
 					f.write('    rsub @spExtensionless\' @spExtensionEnd by @spExtension;\n')
 					f.write('  } spExtensionBackward;\n\n')
 		f.write('} calt;\n\n')
