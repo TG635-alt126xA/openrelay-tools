@@ -312,7 +312,10 @@ class GlyphCollection:
 			print('WARNING: WebKit fix being applied to font with non-zero-width space', file=sys.stderr)
 		if not webkitFix and zeroWidthSpace:
 			print('WARNING: WebKit fix not being applied to font with zero-width space', file=sys.stderr)
-		# Gather all sequences grouped by length
+		# Gather escape sequences
+		escaped = [gn for gn in self.widths.keys() if gn.endswith('.esc')]
+		escapable = [gn.rsplit('.', 1)[0] for gn in escaped]
+		# Gather (non-escape) sequences grouped by length
 		sequences = {}
 		if joiners:
 			for k in self.joinerSequences.keys():
@@ -329,6 +332,11 @@ class GlyphCollection:
 		# Write features to file
 		with open(path, 'w') as f:
 			f.write('feature liga {\n\n')
+			if escapable:
+				f.write('  # Escape sequences\n')
+				for gn in escapable:
+					f.write('  sub backslash %s by %s.esc;\n' % (gn, gn))
+				f.write('\n')
 			for l in sorted(sequences.keys(), reverse=True):
 				if spaces:
 					f.write('  # Sequences of length %d (%d + space)\n' % (l + 1, l))
@@ -446,6 +454,12 @@ class GlyphCollection:
 		extGN = [gn for gn in self.widths.keys() if gn.endswith('.extension')]
 		cartlessGN = [gn.rsplit('.', 1)[0] for gn in cartGN]
 		extlessGN = [gn.rsplit('.', 1)[0] for gn in extGN]
+		cartEscGN = [gn for gn in cartlessGN if gn + '.esc' in self.widths]
+		extEscGN = [gn for gn in extlessGN if gn + '.esc' in self.widths]
+		cartlessGN.extend(gn + '.esc' for gn in cartEscGN)
+		extlessGN.extend(gn + '.esc' for gn in extEscGN)
+		cartGN.extend(gn + '.cartouche' for gn in cartEscGN)
+		extGN.extend(gn + '.extension' for gn in extEscGN)
 		cartZW = sorted(int(gn[1:-6]) for gn in self.widths.keys() if re.match(r'^z[0-9]+[.]ccart$', gn) and '%s.ecart' % gn[0:-6] in self.widths)
 		extZW = sorted(int(gn[1:-5]) for gn in self.widths.keys() if re.match(r'^z[0-9]+[.]cext$', gn) and '%s.eext' % gn[0:-5] in self.widths)
 		fxPairs = sorted(set(self.getForwardExtendablePairs()))

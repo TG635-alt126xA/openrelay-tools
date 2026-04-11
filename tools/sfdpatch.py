@@ -380,6 +380,36 @@ class Sfd:
 					self.charindex[baseName + formName] = i
 					self.chars[i].name = baseName + formName
 
+	def sitelenPonaEscape(self, name):
+		names = name.split(' ')
+		regexes = []
+		for i in range(len(names)-1,-1,-1):
+			if names[i][0] == '/' and names[i][-1] == '/':
+				regexes.append(re.compile(names[i][1:-1]))
+				names.pop(i)
+		nextenc = [0x200000, -1, len(self.chars)]
+		def createEscape(ch):
+			encline = ch.get('Encoding').split(' ')
+			ei = self.charIndex(ch.name + '.esc', True)
+			if not self.chars[ei].properties:
+				self.chars[ei].append('Encoding: %d %d %d' % tuple(nextenc))
+				self.chars[ei].append(ch.get('Width'))
+				self.chars[ei].append('Flags: HW')
+				self.chars[ei].append(ch.get('LayerCount'))
+				self.chars[ei].append('Fore')
+				self.chars[ei].append('Refer: %s %s N 1 0 0 1 0 0 1' % (encline[-1], encline[-2]))
+				nextenc[0] += 1
+				nextenc[2] += 1
+		for i in range(len(self.chars)):
+			if self.chars[i].name in names:
+				createEscape(self.chars[i])
+				continue
+			for regex in regexes:
+				if regex.match(self.chars[i].name):
+					createEscape(self.chars[i])
+					break
+		self.renumber()
+
 	def sitelenPonaCartouche(self, name):
 		names = name.split(' ')
 		regexes = []
@@ -475,6 +505,8 @@ class Sfd:
 					self.subsetRemap(parseSubsetRemap(line[15:]))
 				elif line.startswith('@@@SitelenPonaCartouche '):
 					self.sitelenPonaCartouche(line[24:])
+				elif line.startswith('@@@SitelenPonaEscape '):
+					self.sitelenPonaEscape(line[21:])
 				elif line == '@@@SitelenPonaRename':
 					self.sitelenPonaRename()
 				elif line == '@@@StrictMonospace':
@@ -550,6 +582,8 @@ def main():
 				argType = 'subsetRemap'
 			elif arg == '-spc' or arg == '--sitelenPonaCartouche':
 				argType = 'sitelenPonaCartouche'
+			elif arg == '-spe' or arg == '--sitelenPonaEscape':
+				argType = 'sitelenPonaEscape'
 			elif arg == '-n' or arg == '--renumber':
 				sfd.renumber()
 			elif arg == '-s' or arg == '--sortByCodePoint':
@@ -592,10 +626,16 @@ def main():
 				sfd.sitelenPonaCartouche(arg[5:])
 			elif arg.startswith('--sitelenPonaCartouche='):
 				sfd.sitelenPonaCartouche(arg[23:])
+			elif arg.startswith('-spe='):
+				sfd.sitelenPonaEscape(arg[5:])
+			elif arg.startswith('--sitelenPonaEscape='):
+				sfd.sitelenPonaEscape(arg[20:])
 			else:
 				print(('Unknown option: %s' % arg), file=sys.stderr)
 		elif argType == 'sitelenPonaCartouche':
 			sfd.sitelenPonaCartouche(arg)
+		elif argType == 'sitelenPonaEscape':
+			sfd.sitelenPonaEscape(arg)
 		elif argType == 'subsetRemap':
 			sfd.subsetRemap(parseSubsetRemap(arg))
 		elif argType == 'removeChar':
