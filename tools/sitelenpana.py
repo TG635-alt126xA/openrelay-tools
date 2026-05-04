@@ -65,6 +65,9 @@ def readFontMetrics(path):
 def htmlEscape(s):
 	return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&#34;').replace("'",'&#39;')
 
+def asciiSortKey(s):
+	return re.sub('[0-9]+', lambda m: '%01d%08d' % (0 if m.group(0)[0] == '0' else 1, int(m.group(0))), s.lower())
+
 def getSansSerifFont(size):
 	prop = font_manager.FontProperties()
 	path = font_manager.findfont(prop)
@@ -826,7 +829,7 @@ class GlyphCollection:
 			if category in pairsByCategory:
 				f.write('<h3 id="%s">%s</h3>\n\n' % (category, htmlEscape(title)))
 				f.write('<div class="glyphs"><!--\n')
-				for asciiSequence, name in sorted(pairsByCategory[category], key=lambda p: re.sub(JOINER_RE, '-', p[0].lower())):
+				for asciiSequence, name in sorted(pairsByCategory[category], key=lambda p: re.sub(JOINER_RE, '-', asciiSortKey(p[0]))):
 					f.write('--><div class="gs %s"><div class="gsg">' % category)
 					# ---
 					cp = psUnicode(name)
